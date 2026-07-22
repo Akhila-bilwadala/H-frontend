@@ -11,6 +11,50 @@ export default function RequestHelp() {
     const [coords, setCoords] = useState(null);
     const [aiData, setAiData] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [isListening, setIsListening] = useState(false);
+
+    const toggleListening = () => {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            alert('Speech Recognition is not supported by your browser. Please try Chrome, Edge or Safari.');
+            return;
+        }
+
+        if (isListening) {
+            if (window.recognitionObj) {
+                window.recognitionObj.stop();
+            }
+            setIsListening(false);
+            return;
+        }
+
+        const rec = new SpeechRecognition();
+        rec.continuous = false;
+        rec.interimResults = false;
+        // Suppport both Malayalam and English inputs
+        rec.lang = 'ml-IN'; // Defaults to Malayalam for Kerala context, users can speak English or local language
+
+        rec.onstart = () => {
+            setIsListening(true);
+        };
+
+        rec.onresult = (e) => {
+            const resultText = e.results[0][0].transcript;
+            setDesc(prev => prev ? prev + ' ' + resultText : resultText);
+        };
+
+        rec.onerror = (e) => {
+            console.error('Speech recognition error:', e.error);
+            setIsListening(false);
+        };
+
+        rec.onend = () => {
+            setIsListening(false);
+        };
+
+        rec.start();
+        window.recognitionObj = rec;
+    };
 
     const reverseGeocode = async (lat, lng) => {
         try {
@@ -103,7 +147,14 @@ export default function RequestHelp() {
                                 onChange={(e) => setDesc(e.target.value)}
                                 className="w-full bg-[#0a0a0a] border border-borderDark text-primary p-[10px_12px] text-[12.5px] outline-none resize-none focus:border-[#555] placeholder:text-[#444]"
                             ></textarea>
-                            <div className="absolute right-2 bottom-2 w-7 h-7 border border-borderDark flex items-center justify-center text-textMuted cursor-pointer bg-[#0a0a0a]">
+                            <div
+                                onClick={toggleListening}
+                                className={`absolute right-2 bottom-2 w-7 h-7 border flex items-center justify-center cursor-pointer transition-all ${isListening
+                                        ? 'border-critical text-critical bg-[#3a0d0d] animate-pulse scale-110'
+                                        : 'border-borderDark text-textMuted bg-[#0a0a0a] hover:text-primary hover:border-[#555]'
+                                    }`}
+                                title={isListening ? "Listening... click to stop" : "Speak to type"}
+                            >
                                 <IconMicrophone size={14} />
                             </div>
                         </div>
