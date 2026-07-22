@@ -61,7 +61,14 @@ export default function LandingPage() {
                             </p>
                         </div>
                         <button
-                            onClick={() => navigate('/volunteer')}
+                            onClick={() => {
+                                const auth = JSON.parse(localStorage.getItem('auth') || '{}');
+                                if (auth?.token && auth?.user?.role === 'volunteer') {
+                                    navigate('/volunteer');
+                                } else {
+                                    navigate('/login');
+                                }
+                            }}
                             className="w-full border border-borderDark bg-[#0a0a0a] text-primary p-3 text-[11px] uppercase tracking-[1.5px] font-mono font-medium hover:bg-warning hover:text-black hover:border-warning transition-all flex items-center justify-center gap-2 group/btn cursor-pointer"
                         >
                             Volunteer Portal <IconArrowRight size={13} className="group-hover/btn:translate-x-1 transition-transform" />

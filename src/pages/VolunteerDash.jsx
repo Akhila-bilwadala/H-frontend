@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { IconMapPin, IconClock } from '@tabler/icons-react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const URGENCY_COLOR = { Critical: '#ff3b30', High: '#ffb000', Medium: '#4d9eff', Low: '#4ade80' };
@@ -8,22 +9,25 @@ const STATUS_CLS = { assigned: 'text-warning border-warning', enroute: 'text-inf
 export default function VolunteerDash() {
     const [tasks, setTasks] = useState([]);
     const auth = JSON.parse(localStorage.getItem('auth') || '{}');
+    const navigate = useNavigate();
 
     useEffect(() => {
-        const uid = auth?.user?.uid || 'demo';
+        if (!auth?.token || auth?.user?.role !== 'volunteer') {
+            navigate('/login');
+            return;
+        }
+
+        const email = auth?.user?.email;
         const load = () => {
-            axios.get(`/api/volunteers/tasks/${uid}`).then(r => {
+            axios.get(`/api/volunteers/tasks/${email}`).then(r => {
                 if (r.data.length > 0) setTasks(r.data);
-                else setTasks([
-                    { _id: 't1', description: 'Deliver insulin. Diabetic patient, grandmother, running out tonight.', urgency: 'Critical', status: 'assigned', category: 'medical', peopleAffected: 1 },
-                    { _id: 't2', description: 'Rescue pickup, family of 4 on rooftop, water rising slowly.', urgency: 'High', status: 'enroute', category: 'rescue', peopleAffected: 4 },
-                ]);
+                else setTasks([]); // Show empty state if no active tasks are auto-assigned
             }).catch(() => { });
         };
         load();
-        const t = setInterval(load, 10000); // 10s polling (Phase 7)
+        const t = setInterval(load, 10000);
         return () => clearInterval(t);
-    }, []);
+    }, [auth?.token, auth?.user?.email, auth?.user?.role, navigate]);
 
     const updateStatus = async (id, newStatus) => {
         try {
@@ -60,9 +64,12 @@ export default function VolunteerDash() {
                     <div className="w-2 h-2 bg-critical"></div>
                     <h1 className="text-[13px] tracking-[1.5px] uppercase">Reliefnet — Volunteer</h1>
                 </div>
-                <div className="text-right">
-                    <div className="text-[11.5px] text-primary">{auth?.user?.email || 'Volunteer'}</div>
-                    <div className="text-[9.5px] text-textDark tracking-[1px] uppercase mt-0.5">Zone 07 · Alappuzha</div>
+                <div className="flex items-center gap-4">
+                    <div className="text-right">
+                        <div className="text-[11.5px] text-primary">{auth?.user?.email || 'Volunteer'}</div>
+                        <div className="text-[9.5px] text-textDark tracking-[1px] uppercase mt-0.5">Zone 07 · Alappuzha</div>
+                    </div>
+                    <button onClick={() => { localStorage.removeItem('auth'); navigate('/login'); }} className="text-[9px] tracking-[1px] uppercase p-[5px_10px] bg-[#1a1a1a] text-textMuted hover:text-critical border border-[#333] cursor-pointer font-mono transition-colors">Log Out</button>
                 </div>
             </div>
 
@@ -84,6 +91,12 @@ export default function VolunteerDash() {
             <div className="p-[12px_22px] border-b border-borderDark bg-[#0a0a0a] text-[10.5px] tracking-[1.5px] uppercase text-textMuted flex justify-between">
                 <span>Active tasks</span><span>sorted by priority</span>
             </div>
+
+            {active.length === 0 && done.length === 0 && (
+                <div className="p-[40px_20px] text-center text-[11px] text-textDark tracking-[1.5px] uppercase border-b border-borderDark bg-[#080808]">
+                    No emergency tasks assigned to your zone
+                </div>
+            )}
 
             {active.map(t => (
                 <div key={t._id} className="p-[16px_22px] border-b border-borderLight grid grid-cols-[24px_1fr_auto] gap-3.5 items-start">
