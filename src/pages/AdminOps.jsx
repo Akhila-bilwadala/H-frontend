@@ -4,10 +4,12 @@ import axios from 'axios';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { useNavigate } from 'react-router-dom';
 
 const URGENCY_COLOR = { Critical: '#ff3b30', High: '#ffb000', Medium: '#4d9eff', Low: '#4ade80' };
 
 export default function AdminOps() {
+    const navigate = useNavigate();
     const [requests, setRequests] = useState([]);
     const [alerts, setAlerts] = useState([]);
     const [selectedReq, setSelectedReq] = useState(null);
@@ -20,6 +22,18 @@ export default function AdminOps() {
     const [activeVolunteers, setActiveVolunteers] = useState([]);
 
     useEffect(() => {
+        // Auth guard — redirect to login if not admin
+        try {
+            const auth = JSON.parse(localStorage.getItem('auth') || '{}');
+            if (!auth?.token || auth?.user?.role !== 'admin') {
+                navigate('/login');
+                return;
+            }
+        } catch {
+            navigate('/login');
+            return;
+        }
+
         const load = () => {
             axios.get('/api/requests?sort=priorityScore').then(r => setRequests(r.data)).catch(console.error);
             axios.get('/api/inventory/alerts').then(r => setAlerts(r.data)).catch(console.error);
@@ -28,7 +42,7 @@ export default function AdminOps() {
             axios.get('/api/volunteers/active').then(r => setActiveVolunteers(r.data)).catch(console.error);
         };
         load();
-        const t = setInterval(load, 10000); // 10s polling (Phase 7)
+        const t = setInterval(load, 10000); // 10s polling
         return () => clearInterval(t);
     }, []);
 

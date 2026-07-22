@@ -73,30 +73,30 @@ export default function AdminLogin() {
                     </div>
                 </div>
 
-                {role !== 'Admin' && (
-                    <div className="grid grid-cols-2 border-b border-borderDark">
-                        <div
-                            onClick={() => handleRoleSwitch('Volunteer')}
-                            className={`py-[14px] text-center text-[10.5px] tracking-[1px] uppercase cursor-pointer border-b-2 font-mono ${role === 'Volunteer' ? 'text-primary border-critical font-bold' : 'text-[#555] border-transparent'}`}
-                        >
-                            Volunteer Login
-                        </div>
-                        <div
-                            onClick={() => handleRoleSwitch('Register')}
-                            className={`py-[14px] text-center text-[10.5px] tracking-[1px] uppercase cursor-pointer border-b-2 border-l border-borderDark font-mono ${role === 'Register' ? 'text-warning border-critical font-bold bg-[#1c180d]' : 'text-[#555] border-transparent'}`}
-                        >
-                            Volunteer Register
-                        </div>
+                <div className="grid grid-cols-3 border-b border-borderDark">
+                    <div
+                        onClick={() => handleRoleSwitch('Volunteer')}
+                        className={`py-[14px] text-center text-[10.5px] tracking-[1px] uppercase cursor-pointer border-b-2 font-mono ${role === 'Volunteer' ? 'text-primary border-critical font-bold' : 'text-[#555] border-transparent'}`}
+                    >
+                        Volunteer
                     </div>
-                )}
+                    <div
+                        onClick={() => handleRoleSwitch('Register')}
+                        className={`py-[14px] text-center text-[10.5px] tracking-[1px] uppercase cursor-pointer border-b-2 border-l border-borderDark font-mono ${role === 'Register' ? 'text-warning border-warning font-bold bg-[#1c180d]' : 'text-[#555] border-transparent'}`}
+                    >
+                        Register
+                    </div>
+                    <div
+                        onClick={() => handleRoleSwitch('Admin')}
+                        className={`py-[14px] text-center text-[10.5px] tracking-[1px] uppercase cursor-pointer border-b-2 border-l border-borderDark font-mono ${role === 'Admin' ? 'text-critical border-critical font-bold bg-[#170a0a]' : 'text-[#555] border-transparent'}`}
+                    >
+                        Admin
+                    </div>
+                </div>
 
                 <div className="p-6">
                     {role === 'Admin' ? (
                         <>
-                            <div className="mb-4 flex justify-between items-center bg-[#170a0a] border border-[#a22] p-2.5 mb-5 text-[11px] font-mono">
-                                <span className="text-[#f55] uppercase font-bold">ADMIN / CONTROL CENTER MODE</span>
-                                <span onClick={() => handleRoleSwitch('Volunteer')} className="text-primary hover:underline cursor-pointer">Return</span>
-                            </div>
                             <div className="mb-4">
                                 <label className="block text-[9.5px] tracking-[1px] uppercase text-textMuted mb-[7px] font-mono">Organization</label>
                                 <select className="w-full bg-[#0a0a0a] border border-borderDark text-primary p-[10px_12px] text-[12.5px] outline-none appearance-none focus:border-[#555]">
@@ -179,8 +179,8 @@ export default function AdminLogin() {
                 </div>
 
                 <div className="p-[14px_24px] border-t border-borderDark text-[9.5px] text-[#555] tracking-[0.5px] flex justify-between font-mono">
-                    <span onClick={() => handleRoleSwitch('Admin')} className="cursor-pointer text-[#777] hover:text-primary">Admin Console Login</span>
-                    <span>Kerala flood response</span>
+                    <span>ReliefNet — Kerala Flood Response</span>
+                    <span>v1.6 — Secure Auth</span>
                 </div>
             </div>
         </div>
