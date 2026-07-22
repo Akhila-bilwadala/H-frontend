@@ -12,6 +12,7 @@ export default function RequestHelp() {
     const [aiData, setAiData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [isListening, setIsListening] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
 
     const toggleListening = () => {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -119,6 +120,7 @@ export default function RequestHelp() {
                     summary: res.data.request.translatedText || desc,
                     priorityScore: res.data.request.priorityScore
                 });
+                setSubmitted(true);
             }
         } catch (error) {
             console.error(error);
@@ -127,6 +129,48 @@ export default function RequestHelp() {
             setLoading(false);
         }
     };
+
+    if (submitted && aiData) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-[#050505] p-5">
+                <div className="w-[480px] border border-borderDark bg-stage">
+                    <div className="p-[20px_24px] border-b border-borderDark flex items-center gap-2.5">
+                        <div className="w-2 h-2 bg-healthy"></div>
+                        <h1 className="text-[13px] tracking-[1.5px] uppercase font-medium text-healthy">Request Received</h1>
+                    </div>
+                    <div className="p-6 space-y-4">
+                        <div className="text-[11px] text-textMuted tracking-wide">Your SOS has been routed to our dispatch team. Here is what our AI classified:</div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="border border-borderDark p-3 bg-[#0a0a0a]">
+                                <div className="text-[9px] uppercase tracking-[1px] text-textDark mb-1">Category</div>
+                                <div className="text-[13px] font-bold text-primary font-mono">{aiData.resourceNeeded}</div>
+                            </div>
+                            <div className="border border-borderDark p-3 bg-[#0a0a0a]">
+                                <div className="text-[9px] uppercase tracking-[1px] text-textDark mb-1">Urgency</div>
+                                <div className={`text-[13px] font-bold font-mono ${aiData.urgency === 'critical' ? 'text-critical' : aiData.urgency === 'high' ? 'text-warning' : 'text-healthy'}`}>{aiData.urgency?.toUpperCase()}</div>
+                            </div>
+                            <div className="border border-borderDark p-3 bg-[#0a0a0a] col-span-2">
+                                <div className="text-[9px] uppercase tracking-[1px] text-textDark mb-1">Priority Score</div>
+                                <div className="flex items-center gap-3">
+                                    <div className="flex-1 bg-[#1a1a1a] h-2">
+                                        <div className="h-2 bg-critical" style={{ width: `${Math.min(aiData.priorityScore || 0, 100)}%` }}></div>
+                                    </div>
+                                    <span className="text-[13px] font-mono font-bold text-primary">{aiData.priorityScore || 0}/100</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="border border-borderDark p-3 bg-[#0a0a0a]">
+                            <div className="text-[9px] uppercase tracking-[1px] text-textDark mb-1">AI Summary</div>
+                            <div className="text-[11.5px] text-textMuted leading-relaxed">{aiData.summary}</div>
+                        </div>
+                        <button onClick={() => { setSubmitted(false); setAiData(null); setDesc(''); }} className="w-full border border-borderDark p-3 text-[10.5px] uppercase tracking-[1.5px] font-mono hover:bg-[#111] transition-colors cursor-pointer">
+                            Submit Another Request
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex items-center justify-center min-h-[640px] p-5">

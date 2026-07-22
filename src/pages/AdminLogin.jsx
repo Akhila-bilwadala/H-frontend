@@ -5,10 +5,20 @@ import axios from 'axios';
 
 export default function AdminLogin() {
     const [role, setRole] = useState('Volunteer');
-    const [phone, setPhone] = useState('');
+    const [phone, setPhone] = useState('9876543210');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
+
+    const handleRoleSwitch = (newRole) => {
+        setRole(newRole);
+        if (newRole === 'Admin') {
+            setEmail('admin@relief.net');
+            setPassword('password123');
+        } else {
+            setPhone('9876543210');
+        }
+    };
 
     const handleLogin = async () => {
         try {
@@ -38,14 +48,14 @@ export default function AdminLogin() {
 
                 <div className="grid grid-cols-2 border-b border-borderDark">
                     <div
-                        onClick={() => setRole('Volunteer')}
+                        onClick={() => handleRoleSwitch('Volunteer')}
                         className={`py-[14px] text-center text-[10.5px] tracking-[1px] uppercase cursor-pointer border-b-2 ${role === 'Volunteer' ? 'text-primary border-critical' : 'text-textDark border-transparent'}`}
                     >
                         Volunteer
                     </div>
                     <div
-                        onClick={() => setRole('Admin')}
-                        className={`py-[14px] text-center text-[10.5px] tracking-[1px] uppercase cursor-pointer border-b-2 border-l border-borderDark ${role === 'Admin' ? 'text-primary border-critical' : 'text-textDark border-transparent'}`}
+                        onClick={() => handleRoleSwitch('Admin')}
+                        className={`py-[14px] text-center text-[10.5px] tracking-[1px] uppercase cursor-pointer border-b-2 border-l border-borderDark ${role === 'Admin' ? 'text-critical border-b-critical bg-[#1c0d0d]' : 'text-textDark border-b-transparent'}`}
                     >
                         Admin / NGO
                     </div>
