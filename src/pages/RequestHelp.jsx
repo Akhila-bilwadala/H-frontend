@@ -31,8 +31,8 @@ export default function RequestHelp() {
         const rec = new SpeechRecognition();
         rec.continuous = false;
         rec.interimResults = false;
-        // Suppport both Malayalam and English inputs
-        rec.lang = 'ml-IN'; // Defaults to Malayalam for Kerala context, users can speak English or local language
+        // Dynamically detect system language (e.g. ml-IN or en-US) to avoid crashing on missing local voice packs
+        rec.lang = navigator.language || 'en-US';
 
         rec.onstart = () => {
             setIsListening(true);
@@ -46,6 +46,13 @@ export default function RequestHelp() {
         rec.onerror = (e) => {
             console.error('Speech recognition error:', e.error);
             setIsListening(false);
+            if (e.error === 'not-allowed') {
+                alert('Microphone access denied. Please click the camera/microphone icon in your browser address bar to allow browser access and try again.');
+            } else if (e.error === 'language-not-supported') {
+                alert(`Requested language (${rec.lang}) is not supported on this device. Defaulting to English.`);
+            } else {
+                alert(`Speech recognition error: ${e.error}`);
+            }
         };
 
         rec.onend = () => {
@@ -150,8 +157,8 @@ export default function RequestHelp() {
                             <div
                                 onClick={toggleListening}
                                 className={`absolute right-2 bottom-2 w-7 h-7 border flex items-center justify-center cursor-pointer transition-all ${isListening
-                                        ? 'border-critical text-critical bg-[#3a0d0d] animate-pulse scale-110'
-                                        : 'border-borderDark text-textMuted bg-[#0a0a0a] hover:text-primary hover:border-[#555]'
+                                    ? 'border-critical text-critical bg-[#3a0d0d] animate-pulse scale-110'
+                                    : 'border-borderDark text-textMuted bg-[#0a0a0a] hover:text-primary hover:border-[#555]'
                                     }`}
                                 title={isListening ? "Listening... click to stop" : "Speak to type"}
                             >
