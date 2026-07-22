@@ -4,10 +4,16 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 export default function AdminLogin() {
-    const [role, setRole] = useState('Volunteer');
-    const [phone, setPhone] = useState('9876543210');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [role, setRole] = useState('Volunteer'); // 'Volunteer', 'Register', 'Admin'
+    const [email, setEmail] = useState('demo_volunteer@relief.net');
+    const [password, setPassword] = useState('password123');
+
+    // Registration inputs
+    const [name, setName] = useState('');
+    const [regPhone, setRegPhone] = useState('');
+    const [regEmail, setRegEmail] = useState('');
+    const [regPassword, setRegPassword] = useState('');
+
     const navigate = useNavigate();
 
     const handleRoleSwitch = (newRole) => {
@@ -15,14 +21,15 @@ export default function AdminLogin() {
         if (newRole === 'Admin') {
             setEmail('admin@relief.net');
             setPassword('password123');
-        } else {
-            setPhone('9876543210');
+        } else if (newRole === 'Volunteer') {
+            setEmail('demo_volunteer@relief.net');
+            setPassword('password123');
         }
     };
 
     const handleLogin = async () => {
         try {
-            const payload = role === 'Admin' ? { email, password, role } : { phone, role };
+            const payload = { email, password, role };
             const res = await axios.post('/api/auth/login', payload);
             if (res.data.success) {
                 localStorage.setItem('auth', JSON.stringify(res.data));
@@ -30,42 +37,68 @@ export default function AdminLogin() {
             }
         } catch (error) {
             console.error(error);
-            alert('Login failed');
+            alert(error.response?.data?.error || 'Login failed');
+        }
+    };
+
+    const handleRegister = async () => {
+        if (!name || !regEmail || !regPhone || !regPassword) {
+            alert('Please fill all fields');
+            return;
+        }
+        try {
+            const payload = { name, email: regEmail, password: regPassword, phone: regPhone };
+            const res = await axios.post('/api/auth/register-volunteer', payload);
+            if (res.data.success) {
+                alert(res.data.message || 'Registration complete! Pending admin verification.');
+                setRole('Volunteer');
+                setEmail(regEmail);
+                setPassword(regPassword);
+            }
+        } catch (error) {
+            console.error(error);
+            alert(error.response?.data?.error || 'Registration failed');
         }
     };
 
     return (
-        <div className="flex items-center justify-center min-h-[640px] p-5 cursor-default pointer-events-auto">
-            <div className="w-[460px] border border-borderDark bg-stage">
+        <div className="flex items-center justify-center min-h-[640px] p-5 cursor-default pointer-events-auto bg-[#050505]">
+            <div className="w-[460px] border border-borderDark bg-[#0a0a0a] text-primary">
 
                 <div className="p-[22px_24px] border-b border-borderDark flex items-center gap-2.5">
-                    <div className="w-2 h-2 bg-critical"></div>
+                    <div className="w-2.5 h-2.5 bg-critical"></div>
                     <div>
-                        <h1 className="text-[13px] tracking-[1.5px] uppercase font-medium">Reliefnet</h1>
-                        <div className="text-[9.5px] text-textDark tracking-[1px] mt-[3px] uppercase">Staff and volunteer access</div>
+                        <h1 className="text-[13px] tracking-[1.5px] uppercase font-bold font-mono">Reliefnet</h1>
+                        <div className="text-[9.5px] text-textMuted tracking-[1px] mt-[3px] uppercase font-mono">Staff and volunteer access</div>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 border-b border-borderDark">
-                    <div
-                        onClick={() => handleRoleSwitch('Volunteer')}
-                        className={`py-[14px] text-center text-[10.5px] tracking-[1px] uppercase cursor-pointer border-b-2 ${role === 'Volunteer' ? 'text-primary border-critical' : 'text-textDark border-transparent'}`}
-                    >
-                        Volunteer
+                {role !== 'Admin' && (
+                    <div className="grid grid-cols-2 border-b border-borderDark">
+                        <div
+                            onClick={() => handleRoleSwitch('Volunteer')}
+                            className={`py-[14px] text-center text-[10.5px] tracking-[1px] uppercase cursor-pointer border-b-2 font-mono ${role === 'Volunteer' ? 'text-primary border-critical font-bold' : 'text-[#555] border-transparent'}`}
+                        >
+                            Volunteer Login
+                        </div>
+                        <div
+                            onClick={() => handleRoleSwitch('Register')}
+                            className={`py-[14px] text-center text-[10.5px] tracking-[1px] uppercase cursor-pointer border-b-2 border-l border-borderDark font-mono ${role === 'Register' ? 'text-warning border-critical font-bold bg-[#1c180d]' : 'text-[#555] border-transparent'}`}
+                        >
+                            Volunteer Register
+                        </div>
                     </div>
-                    <div
-                        onClick={() => handleRoleSwitch('Admin')}
-                        className={`py-[14px] text-center text-[10.5px] tracking-[1px] uppercase cursor-pointer border-b-2 border-l border-borderDark ${role === 'Admin' ? 'text-critical border-b-critical bg-[#1c0d0d]' : 'text-textDark border-b-transparent'}`}
-                    >
-                        Admin / NGO
-                    </div>
-                </div>
+                )}
 
                 <div className="p-6">
                     {role === 'Admin' ? (
                         <>
+                            <div className="mb-4 flex justify-between items-center bg-[#170a0a] border border-[#a22] p-2.5 mb-5 text-[11px] font-mono">
+                                <span className="text-[#f55] uppercase font-bold">ADMIN / CONTROL CENTER MODE</span>
+                                <span onClick={() => handleRoleSwitch('Volunteer')} className="text-primary hover:underline cursor-pointer">Return</span>
+                            </div>
                             <div className="mb-4">
-                                <label className="block text-[9.5px] tracking-[1px] uppercase text-textDark mb-[7px]">Organization</label>
+                                <label className="block text-[9.5px] tracking-[1px] uppercase text-textMuted mb-[7px] font-mono">Organization</label>
                                 <select className="w-full bg-[#0a0a0a] border border-borderDark text-primary p-[10px_12px] text-[12.5px] outline-none appearance-none focus:border-[#555]">
                                     <option>District Collectorate — Alappuzha</option>
                                     <option>Aksharam Relief (NGO)</option>
@@ -73,52 +106,71 @@ export default function AdminLogin() {
                                 </select>
                             </div>
                             <div className="mb-4">
-                                <label className="block text-[9.5px] tracking-[1px] uppercase text-textDark mb-[7px]">Work email</label>
+                                <label className="block text-[9.5px] tracking-[1px] uppercase text-textMuted mb-[7px] font-mono">Work email</label>
                                 <input value={email} onChange={e => setEmail(e.target.value)} type="text" placeholder="you@org.gov.in" className="w-full bg-[#0a0a0a] border border-borderDark text-primary p-[10px_12px] text-[12.5px] outline-none focus:border-[#555] placeholder:text-[#444]" />
                             </div>
                             <div className="mb-4">
-                                <label className="block text-[9.5px] tracking-[1px] uppercase text-textDark mb-[7px]">Password</label>
+                                <label className="block text-[9.5px] tracking-[1px] uppercase text-textMuted mb-[7px] font-mono">Password</label>
                                 <input value={password} onChange={e => setPassword(e.target.value)} type="password" placeholder="••••••••" className="w-full bg-[#0a0a0a] border border-borderDark text-primary p-[10px_12px] text-[12.5px] outline-none focus:border-[#555] placeholder:text-[#444]" />
-                                <div className="text-[9.5px] text-[#555] mt-1.5">Admin accounts are pre-provisioned by Reliefnet — no self-signup.</div>
+                                <div className="text-[9.5px] text-[#555] mt-1.5 font-mono">Admin accounts are pre-provisioned by Reliefnet.</div>
                             </div>
-                            <button onClick={handleLogin} className="w-full bg-primary text-[#000] border-none p-[12px_0] text-[11px] tracking-[1.5px] uppercase font-medium cursor-pointer mt-1.5">
+                            <button onClick={handleLogin} className="w-full bg-primary text-[#000] border-none p-[12px_0] text-[11px] tracking-[1.5px] uppercase font-bold cursor-pointer mt-1.5 font-mono">
                                 Log in to console
                             </button>
 
                             <div className="border border-borderDark p-[12px_14px] flex gap-2.5 items-start mt-[18px]">
                                 <IconShieldLock size={14} className="text-info mt-px" />
-                                <div className="text-[10px] text-[#777] leading-[1.6]">Access is restricted to verified government and partner-NGO accounts. Contact your district coordinator for credentials.</div>
+                                <div className="text-[10px] text-[#777] leading-[1.6] font-sans">Access is restricted to verified government and partner-NGO accounts.</div>
                             </div>
+                        </>
+                    ) : role === 'Register' ? (
+                        <>
+                            <div className="mb-4">
+                                <label className="block text-[9.5px] tracking-[1px] uppercase text-textMuted mb-[7px] font-mono">Full Name</label>
+                                <input value={name} onChange={e => setName(e.target.value)} type="text" placeholder="John Doe" className="w-full bg-[#0a0a0a] border border-borderDark text-primary p-[10px_12px] text-[12.5px] outline-none focus:border-[#555] placeholder:text-[#444]" />
+                            </div>
+                            <div className="mb-4">
+                                <label className="block text-[9.5px] tracking-[1px] uppercase text-textMuted mb-[7px] font-mono">Phone Number</label>
+                                <input value={regPhone} onChange={e => setRegPhone(e.target.value)} type="text" placeholder="9876543210" className="w-full bg-[#0a0a0a] border border-borderDark text-primary p-[10px_12px] text-[12.5px] outline-none focus:border-[#555] placeholder:text-[#444]" />
+                            </div>
+                            <div className="mb-4">
+                                <label className="block text-[9.5px] tracking-[1px] uppercase text-textMuted mb-[7px] font-mono">Email Address</label>
+                                <input value={regEmail} onChange={e => setRegEmail(e.target.value)} type="text" placeholder="volunteer@relief.net" className="w-full bg-[#0a0a0a] border border-borderDark text-primary p-[10px_12px] text-[12.5px] outline-none focus:border-[#555] placeholder:text-[#444]" />
+                            </div>
+                            <div className="mb-4">
+                                <label className="block text-[9.5px] tracking-[1px] uppercase text-textMuted mb-[7px] font-mono">Password</label>
+                                <input value={regPassword} onChange={e => setRegPassword(e.target.value)} type="password" placeholder="••••••••" className="w-full bg-[#0a0a0a] border border-borderDark text-primary p-[10px_12px] text-[12.5px] outline-none focus:border-[#555] placeholder:text-[#444]" />
+                            </div>
+                            <button onClick={handleRegister} className="w-full bg-warning text-[#000] border-none p-[12px_0] text-[11px] tracking-[1.5px] uppercase font-bold cursor-pointer mt-1.5 font-mono">
+                                Submit Registration
+                            </button>
                         </>
                     ) : (
                         <>
                             <div className="mb-4">
-                                <label className="block text-[9.5px] tracking-[1px] uppercase text-textDark mb-[7px]">Phone number</label>
-                                <input value={phone} onChange={e => setPhone(e.target.value)} type="text" placeholder="+91 9XXXXXXXXX" className="w-full bg-[#0a0a0a] border border-borderDark text-primary p-[10px_12px] text-[12.5px] outline-none focus:border-[#555] placeholder:text-[#444]" />
+                                <label className="block text-[9.5px] tracking-[1px] uppercase text-textMuted mb-[7px] font-mono">Email Address</label>
+                                <input value={email} onChange={e => setEmail(e.target.value)} type="text" placeholder="volunteer@relief.net" className="w-full bg-[#0a0a0a] border border-borderDark text-primary p-[10px_12px] text-[12.5px] outline-none focus:border-[#555] placeholder:text-[#444]" />
                             </div>
                             <div className="mb-4">
-                                <label className="block text-[9.5px] tracking-[1px] uppercase text-textDark mb-[7px]">OTP</label>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <input type="text" placeholder="Enter 6-digit code" className="w-full bg-[#0a0a0a] border border-borderDark text-primary p-[10px_12px] text-[12.5px] outline-none focus:border-[#555] placeholder:text-[#444]" />
-                                    <input type="text" placeholder="Send code" readOnly className="w-full bg-[#0a0a0a] border border-borderDark text-textDark p-[10px_12px] text-[12.5px] outline-none cursor-pointer" />
-                                </div>
+                                <label className="block text-[9.5px] tracking-[1px] uppercase text-textMuted mb-[7px] font-mono">Password</label>
+                                <input value={password} onChange={e => setPassword(e.target.value)} type="password" placeholder="••••••••" className="w-full bg-[#0a0a0a] border border-borderDark text-primary p-[10px_12px] text-[12.5px] outline-none focus:border-[#555] placeholder:text-[#444]" />
                             </div>
-                            <button onClick={handleLogin} className="w-full bg-primary text-[#000] border-none p-[12px_0] text-[11px] tracking-[1.5px] uppercase font-medium cursor-pointer mt-1.5">
+                            <button onClick={handleLogin} className="w-full bg-primary text-[#000] border-none p-[12px_0] text-[11px] tracking-[1.5px] uppercase font-bold cursor-pointer mt-1.5 font-mono">
                                 Log in
                             </button>
 
-                            <div className="flex items-center gap-2.5 my-[18px] text-[#444] text-[9.5px] tracking-[1px] uppercase">
+                            <div className="flex items-center gap-2.5 my-[18px] text-[#444] text-[9.5px] tracking-[1px] uppercase font-mono">
                                 <span className="flex-1 h-px bg-borderDark"></span>
                                 reporting an emergency
                                 <span className="flex-1 h-px bg-borderDark"></span>
                             </div>
 
-                            <div className="border border-borderDark p-[14px_16px] flex gap-3 items-start">
+                            <div className="border border-borderDark p-[14px_16px] flex gap-3 items-start bg-[#0a0a0a]">
                                 <IconAlertTriangle size={16} className="text-warning mt-px" />
                                 <div>
-                                    <div className="text-[11px] text-[#d4d4d1] mb-1">Need help right now?</div>
-                                    <div className="text-[10.5px] text-[#777] leading-[1.6] mb-2.5">Citizens don't need an account. Submit a request directly with your phone number — no login required.</div>
-                                    <span onClick={() => navigate('/')} className="text-[10.5px] text-primary tracking-[0.5px] uppercase border-b border-primary cursor-pointer inline-block">Submit a request →</span>
+                                    <div className="text-[11px] text-[#d4d4d1] mb-1 font-mono">Need help right now?</div>
+                                    <div className="text-[10.5px] text-[#777] leading-[1.6] mb-2.5 font-sans">Citizens don't need an account. Submit a request directly with your phone number — no login required.</div>
+                                    <span onClick={() => navigate('/request')} className="text-[10.5px] text-primary tracking-[0.5px] uppercase border-b border-primary cursor-pointer inline-block font-mono">Submit a request →</span>
                                 </div>
                             </div>
                         </>
@@ -126,8 +178,8 @@ export default function AdminLogin() {
 
                 </div>
 
-                <div className="p-[14px_24px] border-t border-borderDark text-[9.5px] text-[#555] tracking-[0.5px] flex justify-between">
-                    <span>Reliefnet v0.1</span>
+                <div className="p-[14px_24px] border-t border-borderDark text-[9.5px] text-[#555] tracking-[0.5px] flex justify-between font-mono">
+                    <span onClick={() => handleRoleSwitch('Admin')} className="cursor-pointer text-[#777] hover:text-primary">Admin Console Login</span>
                     <span>Kerala flood response</span>
                 </div>
             </div>
