@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IconLifebuoy, IconShieldAlert, IconUsers, IconArrowRight, IconActivity } from '@tabler/icons-react';
+import { IconLifebuoy, IconAlertCircle, IconUsers, IconArrowRight, IconActivity } from '@tabler/icons-react';
+
 
 export default function LandingPage() {
     const navigate = useNavigate();
@@ -33,7 +34,7 @@ export default function LandingPage() {
                     <div className="p-8 flex flex-col justify-between hover:bg-[#121212] transition-colors group">
                         <div>
                             <div className="w-12 h-12 border border-borderDark flex items-center justify-center text-critical bg-[#1c0d0d] mb-6">
-                                <IconShieldAlert size={24} />
+                                <IconAlertCircle size={24} />
                             </div>
                             <h2 className="text-sm font-bold uppercase tracking-[1.5px] mb-3 text-primary font-mono">Citizens SOS</h2>
                             <p className="text-xs text-textMuted leading-relaxed mb-6 font-sans">
